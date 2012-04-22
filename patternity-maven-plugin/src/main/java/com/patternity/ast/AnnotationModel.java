@@ -21,4 +21,12 @@ public class AnnotationModel extends Model<AnnotationModel> {
     public String getQualifiedName() {
         return qualifiedName;
     }
+
+    @Override
+    public String toString() {
+        return "AnnotationModel{" +
+                "qualifiedName='" + qualifiedName + '\'' +
+                ", visibleAtRuntime=" + visibleAtRuntime +
+                '}';
+    }
 }

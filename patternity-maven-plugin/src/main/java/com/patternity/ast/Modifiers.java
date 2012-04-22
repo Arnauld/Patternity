@@ -46,12 +46,20 @@ public class Modifiers {
         return this;
     }
 
+    public boolean isFinal() {
+        return Modifier.isFinal(modifiers);
+    }
+
     public Modifiers markFinal() {
         return flag(Modifier.FINAL);
     }
 
     public Modifiers markStatic() {
         return flag(Modifier.STATIC);
+    }
+
+    public boolean isStatic() {
+        return Modifier.isStatic(modifiers);
     }
 
     protected Modifiers flag(int mask) {
@@ -63,4 +71,5 @@ public class Modifiers {
         modifiers = modifiers & ~mask;
         return this;
     }
+
 }

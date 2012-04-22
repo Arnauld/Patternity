@@ -1,6 +1,5 @@
 package com.patternity.data.service;
 
-import com.patternity.data.annotation.Repository;
 import com.patternity.data.domain.Story;
 
 import java.util.List;

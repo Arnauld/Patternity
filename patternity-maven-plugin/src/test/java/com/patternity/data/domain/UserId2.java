@@ -10,7 +10,7 @@ public class UserId2 {
 
     public void invalidReference() {
         User2 user2 = new User2();
-        if(user2.getUserId1()==null)
+        if (user2.getUserId1() == null)
             throw new IllegalStateException();
     }
 }

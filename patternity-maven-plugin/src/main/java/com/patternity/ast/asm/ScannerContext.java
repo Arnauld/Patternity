@@ -10,8 +10,6 @@ import org.objectweb.asm.signature.SignatureVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.Stack;
 
 /**
@@ -62,6 +60,10 @@ public class ScannerContext {
         return methodVisitor;
     }
 
+    private ClassModel peekClassModel() {
+        return (ClassModel) peek();
+    }
+
     public Model peek() {
         Model model = stack.peek();
         logger.trace("Peeking from stack: <{}>", model);
@@ -73,10 +75,9 @@ public class ScannerContext {
         logger.debug("Popping from stack: <{}> (remaining {})", model, stack.size());
 
         // only notify root class
-        if(stack.empty()) {
-            ClassModel classModel = (ClassModel)model;
-            classModel.setDependencies(this.dependenciesAlreadyFired);
-            classHandler.exitClass(classModel);
+        if (stack.empty()) {
+            ClassModel classModel = (ClassModel) model;
+            classHandler.handleClass(classModel);
         }
         return model;
     }
@@ -121,17 +122,12 @@ public class ScannerContext {
         }
     }
 
-    private Set<String> dependenciesAlreadyFired = new HashSet<String>();
-
     private void declareDependency(String qualifiedName) {
         // don't fire self-dependency :)
         if (isScannedOrInnerClass(qualifiedName))
             return;
 
-        if (dependenciesAlreadyFired.add(qualifiedName)) {
-            logger.debug("Declaring dependency <{}>", qualifiedName);
-            classHandler.dependencyOn(qualifiedName);
-        }
+        peek().dependsOn(qualifiedName);
     }
 
     private boolean isScannedOrInnerClass(String qualifiedName) {
@@ -163,19 +159,18 @@ public class ScannerContext {
     }
 
     public void enterClass(ClassModel model) {
-        // only notify root class
-        if(stack.empty())
-            classHandler.enterClass(model);
         push(model);
         this.scannedClass = model.getQualifiedName();
     }
 
     public FieldVisitor enterField(FieldModel model) {
+        peekClassModel().addFieldModel(model);
         push(model);
         return getFieldVisitor();
     }
 
     public MethodVisitor enterMethod(MethodModel model) {
+        peekClassModel().addMethodModel(model);
         push(model);
         return getMethodVisitor();
     }

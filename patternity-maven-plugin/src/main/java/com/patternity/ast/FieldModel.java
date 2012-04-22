@@ -15,4 +15,16 @@ public class FieldModel extends Model<FieldModel> {
     public ModelType getModelType() {
         return ModelType.FIELD;
     }
+
+    public String getFieldName() {
+        return name;
+    }
+
+    @Override
+    public String toString() {
+        return "FieldModel{" +
+                "name='" + name + '\'' +
+                ", dependsOn:'" + getDependencies() + '\'' +
+                '}';
+    }
 }

@@ -45,10 +45,13 @@ public class ClassVisitorAdapter implements ClassVisitor {
     @Override
     public AnnotationVisitor visitAnnotation(final String desc, final boolean visibleAtRuntime) {
         logger.debug("Visiting class annotation <{}>", desc);
-        context.addDesc(desc);
 
         AnnotationModel model = AsmUtils.createAnnotationFromDesc(desc, visibleAtRuntime);
-        return context.enterClassAnnotation(model);
+        AnnotationVisitor annotationVisitor = context.enterClassAnnotation(model);
+
+        // define dependency once annotation model is the current model (top of the stack)
+        context.addDesc(desc);
+        return annotationVisitor;
     }
 
     @Override
@@ -60,6 +63,12 @@ public class ClassVisitorAdapter implements ClassVisitor {
                                    final Object value) {
         logger.debug("Visiting class field <{}> <{}>", name, desc);
 
+        FieldModel model = new FieldModel(name);
+        AsmUtils.applyModifiers(model.getModifiers(), access);
+
+        FieldVisitor fieldVisitor = context.enterField(model);
+
+        // define dependency once field model is the current model (top of the stack)
         if (signature == null) {
             context.addDesc(desc);
         } else {
@@ -68,10 +77,7 @@ public class ClassVisitorAdapter implements ClassVisitor {
         if (value instanceof Type) {
             context.addType((Type) value);
         }
-
-        FieldModel model = new FieldModel(name);
-        AsmUtils.applyModifiers(model.getModifiers(), access);
-        return context.enterField(model);
+        return fieldVisitor;
     }
 
     @Override
@@ -79,16 +85,19 @@ public class ClassVisitorAdapter implements ClassVisitor {
                                      final String[] exceptions) {
         logger.debug("Visiting class method <{}> <{}>", name, desc);
 
+        MethodModel model = new MethodModel(name);
+        AsmUtils.applyModifiers(model.getModifiers(), access);
+
+        MethodVisitor methodVisitor = context.enterMethod(model);
+
+        // define dependency once field model is the current model (top of the stack)
         if (signature == null) {
             context.addMethodDesc(desc);
         } else {
             context.addSignature(signature);
         }
         context.addInternalNames(exceptions);
-
-        MethodModel model = new MethodModel(name);
-        AsmUtils.applyModifiers(model.getModifiers(), access);
-        return context.enterMethod(model);
+        return methodVisitor;
     }
 
     @Override
@@ -97,7 +106,7 @@ public class ClassVisitorAdapter implements ClassVisitor {
 
     @Override
     public void visitInnerClass(final String name, final String outerName, final String innerName, final int access) {
-        ClassModel classModel = (ClassModel)context.peek();
+        ClassModel classModel = (ClassModel) context.peek();
         logger.debug("Visiting inner class field outerName: <{}> ({})", outerName, classModel);
         // addName( outerName);
         // addName( innerName);
@@ -105,7 +114,7 @@ public class ClassVisitorAdapter implements ClassVisitor {
 
     @Override
     public void visitOuterClass(final String owner, final String name, final String desc) {
-        ClassModel classModel = (ClassModel)context.peek();
+        ClassModel classModel = (ClassModel) context.peek();
         classModel.innerClassOf(owner);
         logger.debug("Visiting outer class field owner: <{}> ({})", owner, classModel);
         // addName(owner);

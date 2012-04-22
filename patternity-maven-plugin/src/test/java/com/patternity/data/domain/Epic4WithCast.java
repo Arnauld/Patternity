@@ -13,6 +13,6 @@ public class Epic4WithCast {
     private Provider<?> provider;
 
     public List<Story> getStories() {
-        return ((StoryRepository)provider.get()).loadStories();
+        return ((StoryRepository) provider.get()).loadStories();
     }
 }

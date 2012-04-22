@@ -14,7 +14,7 @@ public class AsmScanner implements ClassScanner {
 
     @Override
     public void scan(InputStream clazz, ClassHandler handler) throws IOException {
-        if(clazz==null)
+        if (clazz == null)
             throw new IllegalArgumentException("Stream cannot be null");
         ClassReader cr = new ClassReader(clazz);
         ScannerContext context = new ScannerContext(handler);

@@ -8,6 +8,8 @@
   </appender>
 
   <logger name="com.patternity" level="debug" />
+  <logger name="com.patternity.ast.asm" level="info" />
+  <logger name="com.patternity.rule.basic.ValueObjectStateMustNotDependOnEntity" level="debug"/>
   <root level="error">
     <appender-ref ref="STDOUT" />
   </root>

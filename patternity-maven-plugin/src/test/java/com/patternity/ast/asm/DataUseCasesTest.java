@@ -4,6 +4,7 @@ import com.patternity.ClassWithDependencies;
 import com.patternity.ast.AnnotationModel;
 import com.patternity.ast.ClassHandler;
 import com.patternity.ast.ClassModel;
+import com.patternity.ast.FieldModel;
 import com.patternity.data.domain.*;
 import com.patternity.data.service.RepositoryBase;
 import com.patternity.data.service.StoryRepository;
@@ -13,12 +14,10 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 
@@ -31,33 +30,21 @@ public class DataUseCasesTest {
     private InputStream stream;
 
     // Collected during tests
-    private ClassModel enterClass, exitClass;
-    private List<String> dependencies;
+    private ClassModel scannedClass;
 
     @Before
     public void setUp() {
-        dependencies = new ArrayList<String>();
         handler = new ClassHandler() {
             @Override
-            public void enterClass(ClassModel model) {
-                enterClass = model;
-            }
-
-            @Override
-            public void exitClass(ClassModel model) {
-                exitClass = model;
-            }
-
-            @Override
-            public void dependencyOn(String name) {
-                dependencies.add(name);
+            public void handleClass(ClassModel model) {
+                scannedClass = model;
             }
         };
     }
 
     @After
     public void tearDown() throws IOException {
-        if(stream!=null)
+        if (stream != null)
             stream.close();
     }
 
@@ -69,10 +56,9 @@ public class DataUseCasesTest {
     @Test
     public void epic1_dependencies() throws IOException {
         new AsmScanner().scan(openStreamOf(Epic1.class), handler);
-        assertThat(exitClass, sameInstance(enterClass));
-        assertThat(exitClass.getQualifiedName(), equalTo("com/patternity/data/domain/Epic1"));
+        assertThat(scannedClass.getQualifiedName(), equalTo("com/patternity/data/domain/Epic1"));
 
-        assertThatDependenciesMatch(//
+        assertThatAllDependenciesMatch(//
                 "java/lang/Object",//
                 "java/util/List",//
                 "com/patternity/data/service/StoryRepository",//
@@ -83,10 +69,9 @@ public class DataUseCasesTest {
     @Test
     public void epic2_dependencies() throws IOException {
         new AsmScanner().scan(openStreamOf(Epic2.class), handler);
-        assertThat(exitClass, sameInstance(enterClass));
-        assertThat(exitClass.getQualifiedName(), equalTo("com/patternity/data/domain/Epic2"));
+        assertThat(scannedClass.getQualifiedName(), equalTo("com/patternity/data/domain/Epic2"));
 
-        assertThatDependenciesMatch(//
+        assertThatAllDependenciesMatch(//
                 "java/lang/Object",//
                 "java/util/List",//
                 "com/patternity/data/service/StoryRepository",//
@@ -97,10 +82,9 @@ public class DataUseCasesTest {
     @Test
     public void epic3_dependencies() throws IOException {
         new AsmScanner().scan(openStreamOf(Epic3.class), handler);
-        assertThat(exitClass, sameInstance(enterClass));
-        assertThat(exitClass.getQualifiedName(), equalTo("com/patternity/data/domain/Epic3"));
+        assertThat(scannedClass.getQualifiedName(), equalTo("com/patternity/data/domain/Epic3"));
 
-        assertThatDependenciesMatch(//
+        assertThatAllDependenciesMatch(//
                 "java/lang/Object",//
                 "java/util/List",//
                 "com/patternity/data/service/StoryRepository",//
@@ -111,10 +95,9 @@ public class DataUseCasesTest {
     @Test
     public void epic4_dependencies() throws IOException {
         new AsmScanner().scan(openStreamOf(Epic4.class), handler);
-        assertThat(exitClass, sameInstance(enterClass));
-        assertThat(exitClass.getQualifiedName(), equalTo("com/patternity/data/domain/Epic4"));
+        assertThat(scannedClass.getQualifiedName(), equalTo("com/patternity/data/domain/Epic4"));
 
-        assertThatDependenciesMatch(//
+        assertThatAllDependenciesMatch(//
                 "java/lang/Object",//
                 "java/util/List",//
                 "com/patternity/data/infrastructure/Provider",//
@@ -126,10 +109,9 @@ public class DataUseCasesTest {
     @Test
     public void epic4WithCast_dependencies() throws IOException {
         new AsmScanner().scan(openStreamOf(Epic4WithCast.class), handler);
-        assertThat(exitClass, sameInstance(enterClass));
-        assertThat(exitClass.getQualifiedName(), equalTo("com/patternity/data/domain/Epic4WithCast"));
+        assertThat(scannedClass.getQualifiedName(), equalTo("com/patternity/data/domain/Epic4WithCast"));
 
-        assertThatDependenciesMatch(//
+        assertThatAllDependenciesMatch(//
                 "java/lang/Object",//
                 "java/util/List",//
                 "com/patternity/data/infrastructure/Provider",//
@@ -142,10 +124,9 @@ public class DataUseCasesTest {
     @Test
     public void epic5_dependencies() throws IOException {
         new AsmScanner().scan(openStreamOf(Epic5.class), handler);
-        assertThat(exitClass, sameInstance(enterClass));
-        assertThat(exitClass.getQualifiedName(), equalTo("com/patternity/data/domain/Epic5"));
+        assertThat(scannedClass.getQualifiedName(), equalTo("com/patternity/data/domain/Epic5"));
 
-        assertThatDependenciesMatch(//
+        assertThatAllDependenciesMatch(//
                 "java/lang/Object",//
                 "java/util/List",//
                 "com/patternity/data/domain/Story",//
@@ -156,10 +137,9 @@ public class DataUseCasesTest {
     @Test
     public void epic5AnonymousClass_dependencies() throws IOException {
         new AsmScanner().scan(openStreamOf(Epic5.class, "$1"), handler);
-        assertThat(exitClass, sameInstance(enterClass));
-        assertThat(exitClass.getQualifiedName(), equalTo("com/patternity/data/domain/Epic5$1"));
+        assertThat(scannedClass.getQualifiedName(), equalTo("com/patternity/data/domain/Epic5$1"));
 
-        assertThatDependenciesMatch(//
+        assertThatAllDependenciesMatch(//
                 "java/lang/Object",//
                 "java/util/List",//
                 "com/patternity/data/service/StoryRepository",//
@@ -173,10 +153,9 @@ public class DataUseCasesTest {
     @Test
     public void story_dependencies() throws IOException {
         new AsmScanner().scan(openStreamOf(Story.class), handler);
-        assertThat(exitClass, sameInstance(enterClass));
-        assertThat(exitClass.getQualifiedName(), equalTo("com/patternity/data/domain/Story"));
+        assertThat(scannedClass.getQualifiedName(), equalTo("com/patternity/data/domain/Story"));
 
-        assertThatDependenciesMatch(//
+        assertThatAllDependenciesMatch(//
                 "java/lang/Object"//
         );
     }
@@ -184,10 +163,9 @@ public class DataUseCasesTest {
     @Test
     public void user1_dependencies() throws IOException {
         new AsmScanner().scan(openStreamOf(User1.class), handler);
-        assertThat(exitClass, sameInstance(enterClass));
-        assertThat(exitClass.getQualifiedName(), equalTo("com/patternity/data/domain/User1"));
+        assertThat(scannedClass.getQualifiedName(), equalTo("com/patternity/data/domain/User1"));
 
-        assertThatDependenciesMatch(//
+        assertThatAllDependenciesMatch(//
                 "java/lang/Object",//
                 "com/patternity/data/annotation/Entity"//
         );
@@ -196,10 +174,9 @@ public class DataUseCasesTest {
     @Test
     public void user2_dependencies() throws IOException {
         new AsmScanner().scan(openStreamOf(User2.class), handler);
-        assertThat(exitClass, sameInstance(enterClass));
-        assertThat(exitClass.getQualifiedName(), equalTo("com/patternity/data/domain/User2"));
+        assertThat(scannedClass.getQualifiedName(), equalTo("com/patternity/data/domain/User2"));
 
-        assertThatDependenciesMatch(//
+        assertThatAllDependenciesMatch(//
                 "java/lang/Object",//
                 "com/patternity/data/annotation/Entity",//
                 "com/patternity/data/domain/UserId1"
@@ -207,12 +184,25 @@ public class DataUseCasesTest {
     }
 
     @Test
+    public void user2_fieldDependencies() throws IOException {
+        new AsmScanner().scan(openStreamOf(User2.class), handler);
+
+        List<FieldModel> fieldModels = scannedClass.getFieldModels();
+        assertThat(fieldModels, notNullValue());
+        assertThat(fieldModels.size(), equalTo(1));
+
+        FieldModel fieldModel = fieldModels.get(0);
+        assertThat(fieldModel, notNullValue());
+        assertThat(fieldModel.getFieldName(), equalTo("userId1"));
+        assertThat(fieldModel.getDependencies(), containsInAnyOrder("com/patternity/data/domain/UserId1"));
+    }
+
+    @Test
     public void userId1_dependencies() throws IOException {
         new AsmScanner().scan(openStreamOf(UserId1.class), handler);
-        assertThat(exitClass, sameInstance(enterClass));
-        assertThat(exitClass.getQualifiedName(), equalTo("com/patternity/data/domain/UserId1"));
+        assertThat(scannedClass.getQualifiedName(), equalTo("com/patternity/data/domain/UserId1"));
 
-        assertThatDependenciesMatch(//
+        assertThatAllDependenciesMatch(//
                 "java/lang/Object",//
                 "java/lang/String",//
                 "com/patternity/data/annotation/ValueObject"//
@@ -222,9 +212,9 @@ public class DataUseCasesTest {
     @Test
     public void userId1_annotation() throws IOException {
         new AsmScanner().scan(openStreamOf(UserId1.class), handler);
-        assertThat(exitClass, notNullValue());
+        assertThat(scannedClass, notNullValue());
 
-        List<AnnotationModel> annotationModels = exitClass.getAnnotationModels();
+        List<AnnotationModel> annotationModels = scannedClass.getAnnotationModels();
         assertThat(annotationModels, notNullValue());
         assertThat(annotationModels.size(), equalTo(1));
 
@@ -235,8 +225,7 @@ public class DataUseCasesTest {
     @Test
     public void userId2_dependencies() throws IOException {
         new AsmScanner().scan(openStreamOf(UserId2.class), handler);
-        assertThat(exitClass, sameInstance(enterClass));
-        assertThatDependenciesMatch(//
+        assertThatAllDependenciesMatch(//
                 "java/lang/Object",//
                 "com/patternity/data/domain/User2",//
                 "com/patternity/data/domain/UserId1",//
@@ -248,8 +237,7 @@ public class DataUseCasesTest {
     @Test
     public void repositoryBase_dependencies() throws IOException {
         new AsmScanner().scan(openStreamOf(RepositoryBase.class), handler);
-        assertThat(exitClass, sameInstance(enterClass));
-        assertThatDependenciesMatch(//
+        assertThatAllDependenciesMatch(//
                 "java/lang/Object",//
                 "java/lang/String",//
                 "com/patternity/data/annotation/Repository"
@@ -259,8 +247,7 @@ public class DataUseCasesTest {
     @Test
     public void storyRepository_dependencies() throws IOException {
         new AsmScanner().scan(openStreamOf(StoryRepository.class), handler);
-        assertThat(exitClass, sameInstance(enterClass));
-        assertThatDependenciesMatch(//
+        assertThatAllDependenciesMatch(//
                 "java/util/List",//
                 "com/patternity/data/domain/Story",//
                 "com/patternity/data/service/RepositoryBase"
@@ -270,13 +257,12 @@ public class DataUseCasesTest {
     @Test
     public void storyRepository_superClass() throws IOException {
         new AsmScanner().scan(openStreamOf(StoryRepository.class), handler);
-        assertThat(exitClass.getSuperQualifiedName(),  //
+        assertThat(scannedClass.getSuperQualifiedName(),  //
                 equalTo("com/patternity/data/service/RepositoryBase"));
     }
 
-    private void assertThatDependenciesMatch(String...dependencies) {
-        assertThat(exitClass.getDependencies(),  containsInAnyOrder(dependencies));
-        assertThat(this.dependencies,  containsInAnyOrder(dependencies));
+    private void assertThatAllDependenciesMatch(String... dependencies) {
+        assertThat(scannedClass.collectAllDependencies(), containsInAnyOrder(dependencies));
     }
 
     private InputStream openStreamOf(Class<?> clazz) {
